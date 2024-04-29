@@ -1,5 +1,6 @@
-import { Pressable, StyleSheet, View, Text } from 'react-native'
+import { Pressable } from 'react-native'
 import React from 'react'
+import {Text, View } from './Themed';
 
 interface CustomButtonProps {
   title: string;
@@ -10,29 +11,10 @@ export default function CustomButton({ title, onPress }: CustomButtonProps) {
   return (
     <Pressable
       onPress={onPress}
-      style={styles.button}>
-      <View style={styles.buttonContent}>
-        <Text style={styles.buttonText}>{title}</Text>
+      >
+      <View className='justify-center rounded-full items-center bg-sky-300 p-2'>
+        <Text className='text-lg text-black'>{title}</Text>
       </View>
     </Pressable>
   )
 }
-
-const styles = StyleSheet.create({
-  button: {
-    borderRadius: 20,
-    padding: 10,
-    backgroundColor: 'skyblue',
-    alignItems: 'center',
-    marginVertical:10
-  },
-  buttonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonText: {
-    color:'black',
-    fontSize: 16,
-  },
-})

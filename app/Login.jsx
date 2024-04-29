@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { Button, StyleSheet } from "react-native";
+import { Button } from "react-native";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useEffect, useState } from "react";
 import { View, Text } from "@/components/Themed";
@@ -29,7 +29,7 @@ export default function App() {
   };
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 justify-center p-10">
       <Text>{JSON.stringify(error)}</Text>
       {userInfo && <Text>{JSON.stringify(userInfo.user)}</Text>}
       {userInfo ? (
@@ -44,12 +44,3 @@ export default function App() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    alignContent: "center",
-    justifyContent: "center",
-  },
-});

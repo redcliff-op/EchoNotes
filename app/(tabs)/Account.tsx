@@ -1,4 +1,4 @@
-import { Image, StyleSheet } from 'react-native'
+import { Image } from 'react-native'
 import React from 'react'
 import { View, Text } from '@/components/Themed'
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
@@ -18,40 +18,26 @@ export default function Settings() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={{ flexDirection: 'row', marginVertical: 10 }}>
+    <View className="flex-1 p-3">
+      <View className="flex-row align-middle items-center">
         <Image
-          style={styles.userImage}
+          className="w-[50] h-[50] rounded-full bg-gray-200"
           source={{ uri: userInfo?.user.photo || "" }}
         />
-        <View style={{ justifyContent: 'center', paddingHorizontal: 10 }}>
-          <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
+        <View className='justify-center p-2'>
+          <Text className='text-xl'>
             {userInfo?.user.name}
           </Text>
-          <Text style={{ color: 'gray' }}>
+          <Text className="text-gray-400">
             Your Name
           </Text>
         </View>
       </View>
-      <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'skyblue' }}>
+      <Text className='text-sky-300 text-lg'>
         Email
       </Text>
-      <Text style={{ fontSize: 16 }}>{userInfo?.user.email}</Text>
+      <Text className='text-lg mb-2'>{userInfo?.user.email}</Text>
       <CustomButton title='Logout' onPress={logout} ></CustomButton>
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignContent: 'center',
-    alignItems: 'flex-start',
-    padding: 10
-  },
-  userImage: {
-    height: 50,
-    width: 50,
-    borderRadius: 50
-  }
-})
