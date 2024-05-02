@@ -3,7 +3,7 @@ export default {
     "name": "EchoNotes",
     "slug": "EchoNotes",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",

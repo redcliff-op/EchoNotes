@@ -2,5 +2,6 @@ interface Note{
   id: number,
   title: string,
   body: string,
-  time: number
+  time:number,
+  isSaved: number? = 0
 }

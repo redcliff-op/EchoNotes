@@ -51,10 +51,12 @@ function RootLayoutNav() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <NoteProvider>
-        <Stack>
+        <Stack
+        screenOptions={{headerTintColor:'skyblue'}}>
           <Stack.Screen name='Login' />
           <Stack.Screen name='index' />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name='NewNote'/>
         </Stack>
       </NoteProvider>
     </ThemeProvider>
