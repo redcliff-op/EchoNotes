@@ -1,6 +1,6 @@
 import React from 'react'
 import { Text, View } from './Themed'
-import { EvilIcons } from '@expo/vector-icons'
+import { EvilIcons, Ionicons } from '@expo/vector-icons'
 import { Alert, Pressable } from 'react-native'
 import { useNoteProvider } from '@/Providers/NoteProvider'
 import { router } from 'expo-router'
@@ -13,9 +13,9 @@ interface NoteCardProps {
   isSaved: number
 }
 
-export const NoteCard = ({ id, title, body, time }: NoteCardProps) => {
+export const NoteCard = ({ id, title, body, time, isSaved }: NoteCardProps) => {
 
-  const { deleteNote, setIsEditing } = useNoteProvider()
+  const { deleteNote, setIsEditing, handleSaveNote } = useNoteProvider()
 
   const formatDateAndTime = (timestamp: number): string => {
     const date = new Date(timestamp);
@@ -35,6 +35,7 @@ export const NoteCard = ({ id, title, body, time }: NoteCardProps) => {
         <Text className='text-sky-300'>{formatDateAndTime(time)}</Text>
         <View className='flex-row items-center'>
           <Pressable
+            className='mx-1'
             onPress={() => {
               Alert.alert("Delete Note?", "This cannot be reversed", [
                 {
@@ -47,9 +48,10 @@ export const NoteCard = ({ id, title, body, time }: NoteCardProps) => {
                 }
               ])
             }}>
-            <EvilIcons name='trash' size={35} color={'skyblue'} />
+            <Ionicons name='trash' size={25} color={'skyblue'} />
           </Pressable>
           <Pressable
+            className='mx-1'
             onPress={() => {
               setIsEditing(true)
               router.navigate({
@@ -61,10 +63,14 @@ export const NoteCard = ({ id, title, body, time }: NoteCardProps) => {
                 }
               })
             }}>
-            <EvilIcons name='pencil' size={35} color={'skyblue'} />
+            <Ionicons name='create-outline' size={25} color={'skyblue'} />
           </Pressable>
-          <Pressable>
-            <EvilIcons name='heart' size={35} color={'skyblue'} />
+          <Pressable
+            className='mx-1'
+            onPress={() => {
+              handleSaveNote(id, isSaved)
+            }}>
+            <Ionicons name={(isSaved === 0) ? 'heart-outline' : 'heart'} size={25} color={'skyblue'} />
           </Pressable>
         </View>
       </View>

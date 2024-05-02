@@ -10,7 +10,8 @@ type NoteType = {
   setUserInfo: (userData?: User) => void,
   addNote: (title: string, body: string) => void,
   deleteNote: (id: number) => void,
-  editNote: (id: number, title: string, body: string) => void
+  editNote: (id: number, title: string, body: string) => void,
+  handleSaveNote: (id: number, isSaved: number) => void
 }
 
 const NoteContext = createContext<NoteType>({
@@ -33,7 +34,8 @@ const NoteContext = createContext<NoteType>({
   setUserInfo: (userData?: User) => { },
   addNote: (title: string, body: string) => { },
   deleteNote: (id: number) => { },
-  editNote: (id: number, title: string, body: string) => { }
+  editNote: (id: number, title: string, body: string) => { },
+  handleSaveNote: (id: number, isSaved: number) => { }
 })
 
 const NoteProvider = ({ children }: PropsWithChildren) => {
@@ -70,9 +72,9 @@ const NoteProvider = ({ children }: PropsWithChildren) => {
         'INSERT INTO notes (title, body, time, isSaved) VALUES (?, ?, ?, ?)',
         [title, body, time, 0]).then(
           (result) => {
-            let existingNotes = [...noteList]
-            existingNotes.push({ id: (result.insertId || 0), title: title, body: body, time: time, isSaved: 0 })
-            setNoteList(existingNotes)
+            let existingNotesNotes = [...noteList]
+            existingNotesNotes.push({ id: (result.insertId || 0), title: title, body: body, time: time, isSaved: 0 })
+            setNoteList(existingNotesNotes)
           }
         );
     });
@@ -94,21 +96,35 @@ const NoteProvider = ({ children }: PropsWithChildren) => {
     await db.transactionAsync(async (tx) => {
       await tx.executeSqlAsync('UPDATE notes SET title =?, body =? WHERE id =?', [title, body, id]).then(
         (result) => {
-          console.log('Database update result:', result);
           if (result.rowsAffected > 0) {
-            const updatedNotes = [...noteList]
-            const index = updatedNotes.findIndex(p=>p.id.toString()===id.toString())
-            updatedNotes[index].title = title,
-            updatedNotes[index].body = body
-            setNoteList(updatedNotes);
+            const existingNotes = [...noteList]
+            const index = existingNotes.findIndex(p => p.id.toString() === id.toString())
+            existingNotes[index].title = title
+            existingNotes[index].body = body
+            setNoteList(existingNotes);
           }
         }
       )
     })
   }
 
+  const handleSaveNote = async (id: number, isSaved: number) => {
+    const saved = (isSaved === 0) ? 1 : 0
+    await db.transactionAsync(async (tx) => {
+      tx.executeSqlAsync('UPDATE notes SET isSaved = ? WHERE id = ?', [saved, id]).then(
+        (result) => {
+          if (result.rowsAffected > 0) {
+            const existingNotes = [...noteList]
+            const index = existingNotes.findIndex(p => p.id.toString() === id.toString())
+            existingNotes[index].isSaved = saved
+            setNoteList(existingNotes)
+          }
+        }
+      )
+    })
+  }
   return (
-    <NoteContext.Provider value={{ userInfo, noteList, setUserInfo, addNote, deleteNote, editNote, isEditing, setIsEditing }}>
+    <NoteContext.Provider value={{ userInfo, noteList, setUserInfo, addNote, deleteNote, editNote, isEditing, setIsEditing, handleSaveNote }}>
       {children}
     </NoteContext.Provider>
   )
