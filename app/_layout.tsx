@@ -53,8 +53,8 @@ function RootLayoutNav() {
       <NoteProvider>
         <Stack
         screenOptions={{headerTintColor:'skyblue'}}>
-          <Stack.Screen name='Login' />
           <Stack.Screen name='index' />
+          <Stack.Screen name='Login' />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name='NewNote'/>
         </Stack>

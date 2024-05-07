@@ -7,21 +7,22 @@ import { Redirect } from "expo-router";
 import { useNoteProvider } from "@/Providers/NoteProvider";
 
 export default function App() {
-  const { userInfo } = useNoteProvider();
-  const { setUserInfo } = useNoteProvider();
+  const { userInfo, setUserInfo, syncNotesWithCloud } = useNoteProvider();
   const [error, setError] = useState();
 
   useEffect(() => {
     GoogleSignin.configure({
       webClientId:
-        "967229956856-m2984gvfptui8kh4as636bnq2785nmp0.apps.googleusercontent.com",
+        "431484045629-nbadj51cjhecppbsg007civ6qm9k29vl.apps.googleusercontent.com",
     });
   }, []);
 
   const signin = async () => {
     try {
       await GoogleSignin.hasPlayServices();
-      setUserInfo(await GoogleSignin.signIn())
+      const user = await GoogleSignin.signIn();
+      setUserInfo(user)
+      syncNotesWithCloud(user.user.email)
       setError();
     } catch (e) {
       setError(e);

@@ -1,6 +1,7 @@
 import { User } from "@react-native-google-signin/google-signin/lib/typescript/src/types";
 import { PropsWithChildren, createContext, useContext, useEffect, useState } from "react";
 import * as SQLite from 'expo-sqlite';
+import firestore from '@react-native-firebase/firestore';
 
 type NoteType = {
   userInfo?: User,
@@ -11,7 +12,8 @@ type NoteType = {
   addNote: (title: string, body: string) => void,
   deleteNote: (id: number) => void,
   editNote: (id: number, title: string, body: string) => void,
-  handleSaveNote: (id: number, isSaved: number) => void
+  handleSaveNote: (id: number, isSaved: number) => void,
+  syncNotesWithCloud: (email: string) => void
 }
 
 const NoteContext = createContext<NoteType>({
@@ -35,13 +37,13 @@ const NoteContext = createContext<NoteType>({
   addNote: (title: string, body: string) => { },
   deleteNote: (id: number) => { },
   editNote: (id: number, title: string, body: string) => { },
-  handleSaveNote: (id: number, isSaved: number) => { }
+  handleSaveNote: (id: number, isSaved: number) => { },
+  syncNotesWithCloud: (email: string) => { }
 })
 
 const NoteProvider = ({ children }: PropsWithChildren) => {
 
   const db = SQLite.openDatabase('EchoNotes.db')
-
   const [noteList, setNoteList] = useState<Note[]>([])
   const [userInfo, setUserInfo] = useState<User>()
   const [isEditing, setIsEditing] = useState<boolean>(false)
@@ -123,8 +125,23 @@ const NoteProvider = ({ children }: PropsWithChildren) => {
       )
     })
   }
+
+  const syncNotesWithCloud = async (email: string) => {
+    const firestoreRef = firestore().collection('Users').doc(email)
+    const firestoreSnapshot = await firestoreRef.get()
+    if(!firestoreSnapshot.exists){
+      await firestoreRef.set({
+        noteList: noteList
+      })
+      return;
+    }
+    firestoreRef.update({
+      noteList:noteList
+    })
+  }
+
   return (
-    <NoteContext.Provider value={{ userInfo, noteList, setUserInfo, addNote, deleteNote, editNote, isEditing, setIsEditing, handleSaveNote }}>
+    <NoteContext.Provider value={{ userInfo, noteList, setUserInfo, addNote, deleteNote, editNote, isEditing, setIsEditing, handleSaveNote, syncNotesWithCloud }}>
       {children}
     </NoteContext.Provider>
   )

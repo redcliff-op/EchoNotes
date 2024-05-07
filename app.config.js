@@ -18,7 +18,7 @@ export default {
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.devyashjangid.EchoNotes",
-      "googleServicesFile": process.env.GOOGLE_SERVICES_INFOPLIST
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
@@ -26,7 +26,7 @@ export default {
         "backgroundColor": "#ffffff"
       },
       "package": "com.devyashjangid.EchoNotes",
-      "googleServicesFile": process.env.GOOGLE_SERVICES_JSON
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -35,7 +35,8 @@ export default {
     },
     "plugins": [
       "expo-router",
-      "@react-native-google-signin/google-signin"
+      "@react-native-google-signin/google-signin",
+      "@react-native-firebase/app"
     ],
     "experiments": {
       "typedRoutes": true
