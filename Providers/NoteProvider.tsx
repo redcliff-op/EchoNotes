@@ -74,9 +74,13 @@ const NoteProvider = ({ children }: PropsWithChildren) => {
         'INSERT INTO notes (title, body, time, isSaved) VALUES (?, ?, ?, ?)',
         [title, body, time, 0]).then(
           (result) => {
-            let existingNotesNotes = [...noteList]
-            existingNotesNotes.push({ id: (result.insertId || 0), title: title, body: body, time: time, isSaved: 0 })
-            setNoteList(existingNotesNotes)
+            let existingNotes = [...noteList]
+            existingNotes.push({ id: (result.insertId || 0), title: title, body: body, time: time, isSaved: 0 })
+            setNoteList(existingNotes)
+            const firestoreRef = firestore().collection('Users').doc(userInfo?.user.email);
+            firestoreRef.update({
+              'noteList': existingNotes
+            });
           }
         );
     });
@@ -87,7 +91,12 @@ const NoteProvider = ({ children }: PropsWithChildren) => {
       await tx.executeSqlAsync('DELETE FROM notes WHERE id = ?', [id]).then(
         (result) => {
           if (result.rowsAffected > 0) {
-            setNoteList(noteList.filter((p) => p.id !== id))
+            let existingNotes = noteList.filter((p) => p.id !== id)
+            setNoteList(existingNotes)
+            const firestoreRef = firestore().collection('Users').doc(userInfo?.user.email);
+            firestoreRef.update({
+              'noteList': existingNotes
+            });
           }
         }
       )
@@ -104,6 +113,10 @@ const NoteProvider = ({ children }: PropsWithChildren) => {
             existingNotes[index].title = title
             existingNotes[index].body = body
             setNoteList(existingNotes);
+            const firestoreRef = firestore().collection('Users').doc(userInfo?.user.email);
+            firestoreRef.update({
+              'noteList': existingNotes
+            });
           }
         }
       )
@@ -120,6 +133,10 @@ const NoteProvider = ({ children }: PropsWithChildren) => {
             const index = existingNotes.findIndex(p => p.id.toString() === id.toString())
             existingNotes[index].isSaved = saved
             setNoteList(existingNotes)
+            const firestoreRef = firestore().collection('Users').doc(userInfo?.user.email);
+            firestoreRef.update({
+              'noteList': existingNotes
+            });
           }
         }
       )
@@ -127,18 +144,56 @@ const NoteProvider = ({ children }: PropsWithChildren) => {
   }
 
   const syncNotesWithCloud = async (email: string) => {
-    const firestoreRef = firestore().collection('Users').doc(email)
-    const firestoreSnapshot = await firestoreRef.get()
-    if(!firestoreSnapshot.exists){
+    const firestoreRef = firestore().collection('Users').doc(email);
+    const firestoreSnapshot = await firestoreRef.get();
+
+    if (!firestoreSnapshot.exists) {
       await firestoreRef.set({
         noteList: noteList
-      })
+      });
       return;
     }
-    firestoreRef.update({
-      noteList:noteList
-    })
-  }
+
+    const cloudData = firestoreSnapshot.data();
+
+    if (!cloudData || !cloudData.noteList) {
+      await firestoreRef.set({
+        noteList: noteList
+      });
+      return;
+    }
+
+    const cloudNoteList = cloudData.noteList as Note[];
+    if (cloudNoteList.length === 0) {
+      await firestoreRef.set({
+        noteList: noteList
+      });
+      return;
+    }
+
+    const latestLocalNote = noteList[noteList.length - 1];
+    const latestCloudNote = cloudNoteList[cloudNoteList.length - 1];
+
+    if (noteList.length === 0 || (latestLocalNote.time < latestCloudNote.time)) {
+      setNoteList(cloudNoteList);
+      console.log('asa')
+      await db.transactionAsync(async (tx) => {
+        await tx.executeSqlAsync('DELETE FROM notes');
+        for (const note of cloudNoteList) {
+          await tx.executeSqlAsync(
+            'INSERT INTO notes (title, body, time, isSaved) VALUES (?, ?, ?, ?)',
+            [note.title, note.body, note.time, note.isSaved]
+          );
+        }
+      });
+      fetchNotesFromLocal();
+    } else if (latestLocalNote.time > latestCloudNote.time) {
+      await firestoreRef.set({
+        noteList: noteList
+      });
+    }
+  };
+
 
   return (
     <NoteContext.Provider value={{ userInfo, noteList, setUserInfo, addNote, deleteNote, editNote, isEditing, setIsEditing, handleSaveNote, syncNotesWithCloud }}>
